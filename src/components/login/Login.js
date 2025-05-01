@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import Homepage from "../homepage/Homepage";
 import { useNavigate } from "react-router-dom";
+import "./Login.css";
+import logo from "../../assets/anna_logo.jpg";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -8,7 +9,6 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Correct credentials
   const correctUsername = "anna";
   const correctPassword = "Mortell123!";
 
@@ -24,53 +24,33 @@ const LoginPage = () => {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: "400px",
-        margin: "auto",
-        padding: "20px",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        backgroundColor: "#f9f9f9",
-      }}
-    >
+    <div className="login-container">
+      <img src={logo} className="login-logo" />
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "10px" }}>
+        <div className="form-group">
           <label htmlFor="username">Username</label>
           <input
             type="text"
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
           />
         </div>
 
-        <div style={{ marginBottom: "10px" }}>
+        <div className="form-group">
           <label htmlFor="password">Password</label>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
           />
         </div>
 
-        {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
+        {error && <p className="error-text">{error}</p>}
 
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "10px",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
+        <button type="submit" className="login-button">
           Login
         </button>
       </form>
