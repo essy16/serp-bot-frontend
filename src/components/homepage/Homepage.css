@@ -1,0 +1,90 @@
+.homepage-container {
+    padding: 20px;
+    max-width: 1100px;
+    margin: auto;
+  }
+  
+  .homepage-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 10px;
+  }
+  
+  .homepage-logo img {
+    height: 40px;
+    object-fit: contain;
+  }
+  
+  .homepage-search {
+    flex: 1;
+    max-width: 400px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  
+  .homepage-add-btn {
+    background-color: #800000;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  /* Body section */
+  .dashboard-body {
+    background-color: #fdfbf9;
+  }
+  
+  .dashboard-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 30px;
+  }
+  
+  /* Cards */
+  .client-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  
+  .client-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
+    border: 1px solid #e6e6e6;
+  }
+  
+  .client-name {
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  
+  .progress-bar {
+    height: 8px;
+    background-color: #e9dede;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background-color: #6c1d1d;
+    border-radius: 4px 0 0 4px;
+  }
+  
+  
+  .clients-error{
+    color: #800000;
+    display: flex;
+    align-items: center;
+  }
