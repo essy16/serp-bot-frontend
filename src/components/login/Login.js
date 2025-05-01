@@ -6,6 +6,7 @@ import logo from "../../assets/anna_logo.jpg";
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -15,7 +16,10 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (username === correctUsername && password === correctPassword) {
+    if (
+      username.toLowerCase === correctUsername.toLowerCase &&
+      password === correctPassword
+    ) {
       setError("");
       navigate("/home");
     } else {
@@ -25,7 +29,7 @@ const LoginPage = () => {
 
   return (
     <div className="login-container">
-      <img src={logo} className="login-logo" />
+      <img src={logo} className="login-logo" alt="logo" />
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -40,12 +44,21 @@ const LoginPage = () => {
 
         <div className="form-group">
           <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="password-wrapper">
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
         </div>
 
         {error && <p className="error-text">{error}</p>}
