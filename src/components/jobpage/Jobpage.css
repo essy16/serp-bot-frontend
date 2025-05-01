@@ -1,0 +1,45 @@
+.jobpage-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    font-family: Arial;
+  }
+  
+  .jobpage-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  
+  .jobpage-logo {
+    height: 40px;
+  }
+  
+  .jobpage-search {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 20px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  
+  .jobpage-add-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .job-list .job-card {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    background: #f9f9f9;
+    cursor: pointer;
+  }
+  
