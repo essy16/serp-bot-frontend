@@ -11,8 +11,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/home" element={<Homepage />} />
-        <Route path="/client/:clientName" element={<Jobpage />} />
-        <Route path="/client/:clientName/job/:jobId" element={<Botpage />} />
+        <Route path="/client/:clientId/jobs" element={<Jobpage />} />
+        <Route path="/client/:clientId/job/:jobId" element={<Botpage />} />
       </Routes>
     </Router>
   );

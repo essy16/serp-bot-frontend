@@ -1,40 +1,81 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/anna_logo.jpg";
 import "./Jobpage.css";
 
 const JobPage = () => {
-  const { clientName } = useParams();
+  const { clientId } = useParams();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [jobs, setJobs] = useState([]);
+  const [clientDisplayName, setClientDisplayName] = useState("Client");
+  const BASE_URL = "http://localhost:5000"; // Update as needed for production
 
-  const [jobs, setJobs] = useState([
-    {
-      id: "job1",
-      fileName: "keywords_April.csv",
-      uploadTime: "2024-04-01 12:33",
-      keywordCount: 15,
-    },
-    {
-      id: "job2",
-      fileName: "seo_campaign.csv",
-      uploadTime: "2024-04-10 08:05",
-      keywordCount: 22,
-    },
-  ]);
+  useEffect(() => {
+    const fetchClientInfo = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/clients/${clientId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setClientDisplayName(data.name);
+        } else {
+          alert("Client not found");
+        }
+      } catch (err) {
+        console.error("Error fetching client by ID:", err);
+      }
+    };
 
-  const handleAddJob = () => {
+    if (clientId) fetchClientInfo();
+  }, [clientId]);
+
+  useEffect(() => {
+    if (!clientId) return;
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/clients/${clientId}/jobs`);
+        const data = await response.json();
+        setJobs(
+          data.map((job) => ({
+            id: job.id,
+            fileName: job.name || `Job ${job.id}`,
+            uploadTime: new Date(job.upload_time).toLocaleString(),
+            keywordCount: job.keywords.length,
+          }))
+        );
+      } catch (err) {
+        console.error("Failed to fetch jobs:", err);
+      }
+    };
+
+    fetchJobs();
+  }, [clientId]);
+
+  const handleAddJob = async () => {
     const newJobName = prompt("Enter new job file name:");
-    if (newJobName) {
-      setJobs([
-        {
-          id: `job${Date.now()}`,
+    if (!newJobName || !clientId) return;
+    try {
+      const res = await fetch(`${BASE_URL}/clients/${clientId}/jobs/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newJobName,
+          keywords: ["sample", "test"],
+        }),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        const newJob = {
+          id: result.job_id,
           fileName: newJobName,
           uploadTime: new Date().toLocaleString(),
-          keywordCount: Math.floor(Math.random() * 30) + 1,
-        },
-        ...jobs,
-      ]);
+          keywordCount: 2,
+        };
+        setJobs((prev) => [newJob, ...prev]);
+      }
+    } catch (err) {
+      console.error("Error adding job:", err);
     }
   };
 
@@ -43,12 +84,11 @@ const JobPage = () => {
   );
 
   const handleJobClick = (jobId) => {
-    navigate(`/client/${encodeURIComponent(clientName)}/job/${jobId}`);
+    navigate(`/client/${clientId}/job/${jobId}`);
   };
 
   return (
     <div className="jobpage-container">
-      {/* HEADER */}
       <div className="jobpage-header">
         <img src={logo} alt="Logo" className="jobpage-logo" />
         <input
@@ -63,9 +103,8 @@ const JobPage = () => {
         </button>
       </div>
 
-      {/* JOB LIST */}
       <div className="job-list">
-        <h3>{clientName}'s Jobs</h3>
+        <h3>{clientDisplayName}'s Jobs</h3>
         {filteredJobs.length === 0 ? (
           <p>No jobs found. Add one!</p>
         ) : (
