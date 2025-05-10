@@ -9,7 +9,7 @@ const JobPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [jobs, setJobs] = useState([]);
   const [clientDisplayName, setClientDisplayName] = useState("Client");
-  const BASE_URL = "http://localhost:5000"; // Update as needed for production
+  const BASE_URL = "https://serp-backend-hedub.ondigitalocean.app";
 
   useEffect(() => {
     const fetchClientInfo = async () => {
