@@ -1,45 +1,82 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 import "./Botpage.css";
+
 const Botpage = () => {
+  const { jobId } = useParams();
   const [fileName, setFileName] = useState("");
   const [location, setLocation] = useState("US");
   const [pacing, setPacing] = useState("Slow & Stealthy");
   const [status, setStatus] = useState("Stopped");
   const [keywords, setKeywords] = useState([]);
   const [jobHistory, setJobHistory] = useState([]);
+  const BASE_URL = "https://serp-backend-hedub.ondigitalocean.app";
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || !jobId) return;
 
-    setFileName(file.name);
+    const formData = new FormData();
+    formData.append("file", file);
 
-    const simulatedKeywords = [
-      { keyword: "best seo tools", dwellTime: 25 },
-      { keyword: "top marketing platform", dwellTime: 30 },
-    ];
+    try {
+      const res = await fetch(`${BASE_URL}/jobs/${jobId}/upload`, {
+        method: "POST",
+        body: formData,
+      });
 
-    const newJob = {
-      id: Date.now(),
-      fileName: file.name,
-      uploadTime: new Date().toLocaleString(),
-      keywords: simulatedKeywords,
-      location,
-      pacing,
-      botOutput: `Bot run completed for ${file.name}`,
-    };
+      if (res.ok) {
+        setFileName(file.name);
 
-    setJobHistory([newJob, ...jobHistory]);
-    setKeywords(simulatedKeywords);
-    setStatus("Uploaded");
+        const simulatedKeywords = [
+          { keyword: "best seo tools", dwellTime: 25 },
+          { keyword: "top marketing platform", dwellTime: 30 },
+        ];
+
+        const newJob = {
+          id: Date.now(),
+          fileName: file.name,
+          uploadTime: new Date().toLocaleString(),
+          keywords: simulatedKeywords,
+          location,
+          pacing,
+          botOutput: `Bot run completed for ${file.name}`,
+        };
+
+        setJobHistory([newJob, ...jobHistory]);
+        setKeywords(simulatedKeywords);
+        setStatus("Uploaded");
+      } else {
+        const error = await res.json();
+        alert(error.error || "Upload failed");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+    }
   };
 
-  const handleStartBot = () => {
+  const handleStartBot = async () => {
     setStatus("Running...");
-    setTimeout(() => setStatus("Active"), 1500);
+    try {
+      await fetch(`${BASE_URL}/jobs/${jobId}/activate`, {
+        method: "POST",
+      });
+      setTimeout(() => setStatus("Active"), 1500);
+    } catch (err) {
+      console.error("Start bot error:", err);
+    }
   };
 
-  const handleStopBot = () => setStatus("Stopped");
+  const handleStopBot = async () => {
+    try {
+      await fetch(`${BASE_URL}/jobs/${jobId}/deactivate`, {
+        method: "POST",
+      });
+      setStatus("Stopped");
+    } catch (err) {
+      console.error("Stop bot error:", err);
+    }
+  };
 
   const handleRerun = (job) => {
     setKeywords(job.keywords);
