@@ -9,7 +9,7 @@ const JobPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [jobs, setJobs] = useState([]);
   const [clientDisplayName, setClientDisplayName] = useState("Client");
-  const BASE_URL = "https://serp-backend-hedub.ondigitalocean.app";
+  const BASE_URL = "http://192.168.100.15:5000";
 
   useEffect(() => {
     const fetchClientInfo = async () => {
@@ -54,13 +54,19 @@ const JobPage = () => {
   const handleAddJob = async () => {
     const newJobName = prompt("Enter new job file name:");
     if (!newJobName || !clientId) return;
+
+    const keywordInput = prompt("Enter keywords (comma-separated):");
+    const keywordList = keywordInput
+      ? keywordInput.split(",").map((k) => k.trim())
+      : [];
+
     try {
       const res = await fetch(`${BASE_URL}/clients/${clientId}/jobs/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newJobName,
-          keywords: ["sample", "test"],
+          keywords: keywordList,
         }),
       });
 
@@ -70,7 +76,7 @@ const JobPage = () => {
           id: result.job_id,
           fileName: newJobName,
           uploadTime: new Date().toLocaleString(),
-          keywordCount: 2,
+          keywordCount: keywordList.length,
         };
         setJobs((prev) => [newJob, ...prev]);
       }
