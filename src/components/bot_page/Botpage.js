@@ -1,16 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "./Botpage.css";
 
 const Botpage = () => {
   const { jobId } = useParams();
   const [fileName, setFileName] = useState("");
+  const [jobName, setJobName] = useState("");
+  const [clientName, setClientName] = useState("");
   const [location, setLocation] = useState("US");
   const [pacing, setPacing] = useState("Slow & Stealthy");
   const [status, setStatus] = useState("Stopped");
-  const [keywords, setKeywords] = useState([]);
-  const [jobHistory, setJobHistory] = useState([]);
-  const BASE_URL = "https://serp-backend-hedub.ondigitalocean.app";
+  const [clicks, setClicks] = useState([]);
+  const BASE_URL = "http://127.0.0.1:5000";
+
+  useEffect(() => {
+    if (jobId) {
+      fetch(`${BASE_URL}/jobs/${jobId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setJobName(data.name || "");
+          setClientName(data.client_name || "");
+        })
+        .catch((err) =>
+          console.error("Failed to load job name or client:", err)
+        );
+
+      fetch(`${BASE_URL}/jobs/${jobId}/clicks`)
+        .then((res) => res.json())
+        .then((data) => setClicks(data))
+        .catch((err) => console.error("Failed to load clicks:", err));
+    }
+  }, [jobId]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -27,25 +47,12 @@ const Botpage = () => {
 
       if (res.ok) {
         setFileName(file.name);
-
-        const simulatedKeywords = [
-          { keyword: "best seo tools", dwellTime: 25 },
-          { keyword: "top marketing platform", dwellTime: 30 },
-        ];
-
-        const newJob = {
-          id: Date.now(),
-          fileName: file.name,
-          uploadTime: new Date().toLocaleString(),
-          keywords: simulatedKeywords,
-          location,
-          pacing,
-          botOutput: `Bot run completed for ${file.name}`,
-        };
-
-        setJobHistory([newJob, ...jobHistory]);
-        setKeywords(simulatedKeywords);
         setStatus("Uploaded");
+
+        // Refresh clicks
+        const refreshed = await fetch(`${BASE_URL}/jobs/${jobId}/clicks`);
+        const data = await refreshed.json();
+        setClicks(data);
       } else {
         const error = await res.json();
         alert(error.error || "Upload failed");
@@ -78,17 +85,31 @@ const Botpage = () => {
     }
   };
 
-  const handleRerun = (job) => {
-    setKeywords(job.keywords);
-    setLocation(job.location);
-    setPacing(job.pacing);
-    setStatus("Re-running...");
-    setTimeout(() => setStatus("Active"), 1500);
+  const handleRunBot = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/jobs/${jobId}/run-bot`, {
+        method: "POST",
+      });
+      const data = await res.json();
+
+      // 🛡️ Defensive check
+      if (Array.isArray(data)) {
+        setClicks(data);
+      } else {
+        console.error("Unexpected response:", data);
+      }
+    } catch (err) {
+      console.error("Run bot error:", err);
+    }
   };
 
   return (
     <div className="botpage-container">
-      <h1 className="botpage-title">SERP Click Bot Dashboard</h1>
+      <h1 className="botpage-title">
+        SERP Click Bot Dashboard
+        {clientName && ` - ${clientName}`}
+        {jobName && ` / ${jobName}`}
+      </h1>
 
       <div className="form-section">
         <label>
@@ -134,70 +155,43 @@ const Botpage = () => {
         <button onClick={handleStopBot} className="btn-stop">
           Stop Bot
         </button>
+        <button onClick={handleRunBot} className="btn-rerun">
+          Run Bot Now
+        </button>
       </div>
 
       <div className="form-section">
         <strong>Bot Status:</strong> {status}
       </div>
 
-      {keywords.length > 0 && (
-        <div className="keywords-table">
-          <h3>Active Keywords</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Keyword</th>
-                <th>Dwell Time</th>
-                <th>Location</th>
-                <th>Pacing</th>
-              </tr>
-            </thead>
-            <tbody>
-              {keywords.map((k, i) => (
+      <div className="keywords-table">
+        <h3>Active Keywords</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Keyword</th>
+              <th>Dwell Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clicks.length > 0 ? (
+              clicks.map((click, i) => (
                 <tr key={i}>
-                  <td>{k.keyword}</td>
-                  <td>{k.dwellTime}</td>
-                  <td>{location}</td>
-                  <td>{pacing}</td>
+                  <td>{click.keyword}</td>
+                  <td>{click.dwell_time}</td>
+                  <td>{click.status || "pending"}</td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <div className="job-history">
-        <h3>Job History</h3>
-        {jobHistory.length === 0 ? (
-          <p>No past jobs yet.</p>
-        ) : (
-          jobHistory.map((job) => (
-            <div className="job-card" key={job.id}>
-              <div>
-                <strong>File:</strong> {job.fileName}
-              </div>
-              <div>
-                <strong>Uploaded:</strong> {job.uploadTime}
-              </div>
-              <div>
-                <strong>Keywords:</strong>{" "}
-                {job.keywords.map((k) => k.keyword).join(", ")}
-              </div>
-              <div>
-                <strong>Location:</strong> {job.location}
-              </div>
-              <div>
-                <strong>Pacing:</strong> {job.pacing}
-              </div>
-              <div>
-                <strong>Logs:</strong> {job.botOutput}
-              </div>
-              <button onClick={() => handleRerun(job)} className="btn-rerun">
-                Re-run Job
-              </button>
-            </div>
-          ))
-        )}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" style={{ textAlign: "center" }}>
+                  No keywords uploaded yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
